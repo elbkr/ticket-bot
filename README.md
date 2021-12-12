@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://github.com/elbkr/music-bot">
-    <img src="readme/ticket-bot.png" alt="music-bot" width="500"/>
+  <a href="https://github.com/elbkr/ticket-bot">
+    <img src="readme/ticket-bot.png" alt="ticket-bot" width="500"/>
   </a>
 </p>
 
