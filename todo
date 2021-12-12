@@ -1,0 +1,5 @@
+1. Automatically make ticket topic using mongoDB
+2. Block user from using the bot w/mongoDB
+3. Improve the topic choosing
+4. Help cmd
+5. Possibility to make the ticket names to ticket-ASCENDING_NUMBER
