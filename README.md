@@ -5,6 +5,7 @@
 </p>
 
 ## Features
+- Multi guild!
 - Open tickets by pressing a button
 - Add and remove bot moderators
 - Manage tickets by buttons or slash commands
