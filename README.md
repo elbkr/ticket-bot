@@ -41,7 +41,7 @@
 5. Paste the token at `TOKEN` line and the client ID  at `CLIENT_ID` line in `.env` file
 6. Change `REPLACE_THIS` in the URL below with the client ID, and enter the link in your browser
 
-`https://discord.com/api/oauth2/authorize?client_id=REPLACE_THIS&permissions=8&scope=applications.commands%20bot`
+https://discord.com/api/oauth2/authorize?client_id=REPLACE_THIS&permissions=8&scope=applications.commands%20bot
 
 ### Connecting to mongo DB
 1. Login or register into [Mongo DB](https://account.mongodb.com/account/login)
