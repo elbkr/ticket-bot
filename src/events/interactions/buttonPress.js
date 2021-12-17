@@ -1,5 +1,5 @@
 const tickets = require("../../models/Tickets");
-const hastebin = require("hastebin");
+const JSP = require("jspaste")
 
 const {
   MessageEmbed,
@@ -272,16 +272,8 @@ module.exports = class ButtonPress extends Event {
                           .reverse()
                           .join("\n");
                         if (b.length < 1) b = "No messages sent";
-                        hastebin
-                          .createPaste(
-                            b,
-                            {
-                              contentType: "text/plain",
-                              server: "https://hastebin.com",
-                            },
-                            {}
-                          )
-                          .then(async (urlToPaste) => {
+                        await JSP.publish(b).then(async (data) => {
+                          let urlToPaste = data.url
                             let row = new MessageActionRow().addComponents(
                               new MessageButton()
                                 .setLabel("View transcript")
@@ -398,16 +390,8 @@ module.exports = class ButtonPress extends Event {
                       .reverse()
                       .join("\n");
                     if (b.length < 1) b = "No messages sent";
-                    hastebin
-                      .createPaste(
-                        b,
-                        {
-                          contentType: "text/plain",
-                          server: "https://hastebin.com",
-                        },
-                        {}
-                      )
-                      .then(async (urlToPaste) => {
+                    await JSP.publish(b).then(async (data) => {
+                      let urlToPaste = data.url
                         let row = new MessageActionRow().addComponents(
                           new MessageButton()
                             .setLabel("View transcript")
@@ -672,16 +656,8 @@ module.exports = class ButtonPress extends Event {
           .reverse()
           .join("\n");
         if (b.length < 1) b = "No messages sent";
-        hastebin
-          .createPaste(
-            b,
-            {
-              contentType: "text/plain",
-              server: "https://hastebin.com",
-            },
-            {}
-          )
-          .then(async (urlToPaste) => {
+        await JSP.publish(b).then(async (data) => {
+          let urlToPaste = data.url
             let ticket = await tickets.findOne({
               ticketID: int.channel.id,
               guildID: int.guild.id,
@@ -846,16 +822,8 @@ module.exports = class ButtonPress extends Event {
           .reverse()
           .join("\n");
         if (a.length < 1) a = "No messages sent";
-        hastebin
-          .createPaste(
-            a,
-            {
-              contentType: "text/plain",
-              server: "https://hastebin.com",
-            },
-            {}
-          )
-          .then(async (urlToPaste) => {
+        await JSP.publish(a).then(async (data) => {
+          let urlToPaste = data.url
             let ticket = await tickets.findOne({
               ticketID: int.channel.id,
               guildID: int.guild.id,

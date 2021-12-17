@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "discord.js ticket bot using mongoDB",
   "main": "index.js",
-   "engines": {
+  "engines": {
     "node": "16.x"
   },
   "scripts": {
@@ -37,7 +37,7 @@
     "dotenv": "^10.0.0",
     "fs": "^0.0.1-security",
     "glob": "^7.2.0",
-    "hastebin": "^0.2.1",
+    "jspaste": "^9.0.6",
     "moment": "^2.29.1",
     "mongoose": "^6.1.2",
     "utf-8-validate": "^5.0.7",

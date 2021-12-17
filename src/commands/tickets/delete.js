@@ -1,6 +1,6 @@
 const tickets = require("../../models/Tickets");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-const hastebin = require("hastebin");
+const JSP = require("jspaste");
 
 module.exports = class Delete extends Interaction {
   constructor() {
@@ -54,16 +54,8 @@ module.exports = class Delete extends Interaction {
         .reverse()
         .join("\n");
       if (b.length < 1) b = "No messages sent";
-      hastebin
-        .createPaste(
-          b,
-          {
-            contentType: "text/plain",
-            server: "https://hastebin.com",
-          },
-          {}
-        )
-        .then(async (urlToPaste) => {
+      await JSP.publish(a).then(async (data) => {
+        let urlToPaste = data.url
           let ticket = await tickets.findOne({
             ticketID: int.channel.id,
             guildID: int.guild.id,
