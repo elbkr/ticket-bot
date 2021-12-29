@@ -266,8 +266,8 @@ module.exports = class Open extends Interaction {
                         .reverse()
                         .join("\n");
                       if (b.length < 1) b = "No messages sent";
-                      await JSP.publish(b).then(async (data) => {
-                        let urlToPaste = data.url
+                      await JSP.publish(b).then(async (res) => {
+                        let urlToPaste = res.url
                           let row = new MessageActionRow().addComponents(
                             new MessageButton()
                               .setLabel("View transcript")
@@ -378,8 +378,8 @@ module.exports = class Open extends Interaction {
                     .reverse()
                     .join("\n");
                   if (b.length < 1) b = "No messages sent";
-                  await JSP.publish(b).then(async (data) => {
-                    let urlToPaste = data.url
+                  await JSP.publish(b).then(async (res) => {
+                    let urlToPaste = res.url
                       let row = new MessageActionRow().addComponents(
                         new MessageButton()
                           .setLabel("View transcript")

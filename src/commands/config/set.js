@@ -76,7 +76,7 @@ module.exports = class SetFunction extends Interaction {
       await data.save();
 
       return int.reply({
-        content: `Tickets will be created under *${channel.name}**`,
+        content: `Tickets will be created under **${channel.name}**`,
         ephemeral: true,
       });
     }

@@ -49,8 +49,8 @@ module.exports = class Transcript extends Interaction {
         .reverse()
         .join("\n");
       if (a.length < 1) a = "No messages sent";
-      await JSP.publish(a).then(async (data) => {
-        let urlToPaste = data.url
+      await JSP.publish(a).then(async (res) => {
+        let urlToPaste = res.url
           let ticket = await tickets.findOne({
             ticketID: int.channel.id,
             guildID: int.guild.id,

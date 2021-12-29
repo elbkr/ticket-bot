@@ -54,8 +54,8 @@ module.exports = class Delete extends Interaction {
         .reverse()
         .join("\n");
       if (b.length < 1) b = "No messages sent";
-      await JSP.publish(a).then(async (data) => {
-        let urlToPaste = data.url
+      await JSP.publish(a).then(async (res) => {
+        let urlToPaste = res.url
           let ticket = await tickets.findOne({
             ticketID: int.channel.id,
             guildID: int.guild.id,
