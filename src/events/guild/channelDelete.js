@@ -1,6 +1,5 @@
 const tickets = require("../../models/Tickets");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-const JSP = require("jspaste");
 module.exports = class ChannelDelete extends Event {
   constructor() {
     super({
@@ -35,8 +34,15 @@ module.exports = class ChannelDelete extends Event {
               .reverse()
               .join("\n");
             if (b.length < 1) b = "No messages sent";
-            await JSP.publish(b).then(async (res) => {
-              let urlToPaste = res.url
+            await this.client.paste
+              .createPaste({
+                code: `${b}`,
+                expireDate: "N",
+                publicity: 1,
+                name: `${int.channel.name}`,
+              })
+              .then(async (res) => {
+                let urlToPaste = res;
                 let row = new MessageActionRow().addComponents(
                   new MessageButton()
                     .setLabel("View transcript")

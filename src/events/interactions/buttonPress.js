@@ -1,5 +1,4 @@
 const tickets = require("../../models/Tickets");
-const JSP = require("jspaste")
 
 const {
   MessageEmbed,
@@ -48,7 +47,6 @@ module.exports = class ButtonPress extends Event {
           type: "text",
         })
         .then(async (c) => {
-
           data.modRoles.forEach(async (r) => {
             await c.permissionOverwrites.edit(r, {
               VIEW_CHANNEL: true,
@@ -213,8 +211,7 @@ module.exports = class ButtonPress extends Event {
               });
 
             i.reply({
-              content:
-                "Now send the reason of the ticket **in one message**",
+              content: "Now send the reason of the ticket **in one message**",
             });
 
             const filter = (m) => m.author.id === int.user.id;
@@ -272,8 +269,15 @@ module.exports = class ButtonPress extends Event {
                           .reverse()
                           .join("\n");
                         if (b.length < 1) b = "No messages sent";
-                        await JSP.publish(b).then(async (res) => {
-                          let urlToPaste = res.url
+                        await this.client.paste
+                          .createPaste({
+                            code: `${b}`,
+                            expireDate: "N",
+                            publicity: 1,
+                            name: `${int.channel.name}`,
+                          })
+                          .then(async (res) => {
+                            let urlToPaste = res;
                             let row = new MessageActionRow().addComponents(
                               new MessageButton()
                                 .setLabel("View transcript")
@@ -390,46 +394,53 @@ module.exports = class ButtonPress extends Event {
                       .reverse()
                       .join("\n");
                     if (b.length < 1) b = "No messages sent";
-                    await JSP.publish(b).then(async (res) => {
-                      let urlToPaste = res.url
-                        let row = new MessageActionRow().addComponents(
-                          new MessageButton()
-                            .setLabel("View transcript")
-                            .setURL(urlToPaste)
-                            .setStyle("LINK")
-                        );
+                  await this.client.paste
+                    .createPaste({
+                      code: `${b}`,
+                      expireDate: "N",
+                      publicity: 1,
+                      name: `${int.channel.name}`,
+                    })
+                    .then(async (res) => {
+                      let urlToPaste = res;
+                      let row = new MessageActionRow().addComponents(
+                        new MessageButton()
+                          .setLabel("View transcript")
+                          .setURL(urlToPaste)
+                          .setStyle("LINK")
+                      );
 
-                        let owner = await int.guild.members.fetch(ticket._id);
-                        let log = new MessageEmbed()
-                          .setTitle("Ticket deleted")
-                          .setAuthor(
-                            this.client.user.username,
-                            this.client.user.displayAvatarURL({ dynamic: true })
-                          )
-                          .addFields([
-                            {
-                              name: "Moderator",
-                              value: `The bot`,
-                              inline: true,
-                            },
-                            {
-                              name: "Ticket",
-                              value: `${c.id}`,
-                              inline: true,
-                            },
-                            {
-                              name: "Opened by",
-                              value: `${owner}`,
-                              inline: true,
-                            },
-                          ])
-                          .setColor("#ff3c3c")
-                          .setTimestamp();
-                        let logs = await int.guild.channels.fetch(
-                          data.logsChannel
-                        );
-                        logs.send({ embeds: [log], components: [row] });
-                      });
+                      let owner = await int.guild.members.fetch(ticket._id);
+                      let log = new MessageEmbed()
+                        .setTitle("Ticket deleted")
+                        .setAuthor(
+                          this.client.user.username,
+                          this.client.user.displayAvatarURL({ dynamic: true })
+                        )
+                        .addFields([
+                          {
+                            name: "Moderator",
+                            value: `The bot`,
+                            inline: true,
+                          },
+                          {
+                            name: "Ticket",
+                            value: `${c.id}`,
+                            inline: true,
+                          },
+                          {
+                            name: "Opened by",
+                            value: `${owner}`,
+                            inline: true,
+                          },
+                        ])
+                        .setColor("#ff3c3c")
+                        .setTimestamp();
+                      let logs = await int.guild.channels.fetch(
+                        data.logsChannel
+                      );
+                      logs.send({ embeds: [log], components: [row] });
+                    });
                   });
                 } else {
                   let owner = await int.guild.members.fetch(ticket._id);
@@ -656,8 +667,15 @@ module.exports = class ButtonPress extends Event {
           .reverse()
           .join("\n");
         if (b.length < 1) b = "No messages sent";
-        await JSP.publish(b).then(async (res) => {
-          let urlToPaste = res.url
+        await this.client.paste
+          .createPaste({
+            code: `${b}`,
+            expireDate: "N",
+            publicity: 1,
+            name: `${int.channel.name}`,
+          })
+          .then(async (res) => {
+            let urlToPaste = res;
             let ticket = await tickets.findOne({
               ticketID: int.channel.id,
               guildID: int.guild.id,
@@ -732,7 +750,8 @@ module.exports = class ButtonPress extends Event {
       let main = await int.channel.messages.fetch(ticket.mainMessageID);
       let user = await int.guild.members.fetch(ticket._id);
 
-      if (!user) return int.reply({ content: "I couldn't find the ticket owner!" });
+      if (!user)
+        return int.reply({ content: "I couldn't find the ticket owner!" });
       ticket.closed = false;
       ticket.panelMessageID = undefined;
       await ticket.save();
@@ -807,7 +826,7 @@ module.exports = class ButtonPress extends Event {
       });
 
       int.channel.messages.fetch().then(async (messages) => {
-        let a = messages
+        let b = messages
           .filter((m) => m.author.bot !== true)
           .map(
             (m) =>
@@ -821,9 +840,16 @@ module.exports = class ButtonPress extends Event {
           )
           .reverse()
           .join("\n");
-        if (a.length < 1) a = "No messages sent";
-        await JSP.publish(a).then(async (res) => {
-          let urlToPaste = res.url
+        if (b.length < 1) b = "No messages sent";
+        await this.client.paste
+          .createPaste({
+            code: `${b}`,
+            expireDate: "N",
+            publicity: 1,
+            name: `${int.channel.name}`,
+          })
+          .then(async (res) => {
+            let urlToPaste = res;
             let ticket = await tickets.findOne({
               ticketID: int.channel.id,
               guildID: int.guild.id,

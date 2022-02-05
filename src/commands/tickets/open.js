@@ -5,7 +5,6 @@ const {
   MessageSelectMenu,
   MessageButton,
 } = require("discord.js");
-const JSP = require("jspaste")
 
 module.exports = class Open extends Interaction {
   constructor() {
@@ -266,8 +265,15 @@ module.exports = class Open extends Interaction {
                         .reverse()
                         .join("\n");
                       if (b.length < 1) b = "No messages sent";
-                      await JSP.publish(b).then(async (res) => {
-                        let urlToPaste = res.url
+                      await this.client.paste
+                        .createPaste({
+                          code: `${b}`,
+                          expireDate: "N",
+                          publicity: 1,
+                          name: `${int.channel.name}`,
+                        })
+                        .then(async (res) => {
+                          let urlToPaste = res;
                           let row = new MessageActionRow().addComponents(
                             new MessageButton()
                               .setLabel("View transcript")
@@ -378,8 +384,15 @@ module.exports = class Open extends Interaction {
                     .reverse()
                     .join("\n");
                   if (b.length < 1) b = "No messages sent";
-                  await JSP.publish(b).then(async (res) => {
-                    let urlToPaste = res.url
+                  await this.client.paste
+                    .createPaste({
+                      code: `${b}`,
+                      expireDate: "N",
+                      publicity: 1,
+                      name: `${int.channel.name}`,
+                    })
+                    .then(async (res) => {
+                      let urlToPaste = res;
                       let row = new MessageActionRow().addComponents(
                         new MessageButton()
                           .setLabel("View transcript")
