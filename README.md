@@ -59,6 +59,12 @@ https://discord.com/api/oauth2/authorize?client_id=REPLACE_THIS&permissions=8&sc
 
 *The URL looks like this:* `mongodb+srv://username:password@clusterName.pjxpv.mongodb.net/MyFirstDatabase?retryWrites=true&w=majority`
 
+### Getting Pastebin API key
+1. Login or register into [Pastebin](https://pastebin.com)
+2. Go to https://pastebin.com/doc_api
+3. Slide down to **Your Unique Developer API Key** section 
+4. Copy the key and paste it into `.env` file  at `PASTEBIN_API_KEY` line
+
 ### Changing ticket topics
 1. Go to `src/events/interactions/buttonPress.js` file
 2. Slide down to the line **127**

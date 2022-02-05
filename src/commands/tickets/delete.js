@@ -1,6 +1,5 @@
 const tickets = require("../../models/Tickets");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-const JSP = require("jspaste");
 
 module.exports = class Delete extends Interaction {
   constructor() {
@@ -54,8 +53,15 @@ module.exports = class Delete extends Interaction {
         .reverse()
         .join("\n");
       if (b.length < 1) b = "No messages sent";
-      await JSP.publish(a).then(async (res) => {
-        let urlToPaste = res.url
+      await this.client.paste
+        .createPaste({
+          code: `${b}`,
+          expireDate: "N",
+          publicity: 1,
+          name: `${int.channel.name}`,
+        })
+        .then(async (res) => {
+          let urlToPaste = res;
           let ticket = await tickets.findOne({
             ticketID: int.channel.id,
             guildID: int.guild.id,

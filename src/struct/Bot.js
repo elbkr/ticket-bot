@@ -1,5 +1,6 @@
 const {Client, Collection, Intents} = require("discord.js");
 const {connect, connection: db} = require("mongoose");
+const PasteClient = require("pastebin-api").default;
 const {Routes} = require("discord-api-types/v9");
 const {REST} = require("@discordjs/rest");
 const {resolve} = require("path");
@@ -93,6 +94,10 @@ module.exports = class Bot extends Client {
         return (time[0] * 1e9 + time[1]) * 1e-6;
     }
 
+    async loadPaste() {
+        let paste = new PasteClient(process.env.PASTEBIN_API_KEY);
+        this.paste = paste;
+    }
 
     /* Load slash commands for each guilds */
     async loadInteractions(guildId) {
@@ -138,6 +143,7 @@ module.exports = class Bot extends Client {
     async start(token) {
         await this.loadEvents();
         await this.loadDatabase();
+        await this.loadPaste();
         return super.login(token);
     }
 };

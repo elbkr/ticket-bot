@@ -1,7 +1,5 @@
 const tickets = require("../../models/Tickets");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-const JSP = require("jspaste");
-
 module.exports = class Transcript extends Interaction {
   constructor() {
     super({
@@ -34,7 +32,7 @@ module.exports = class Transcript extends Interaction {
     });
 
     int.channel.messages.fetch().then(async (messages) => {
-      let a = messages
+      let b = messages
         .filter((m) => m.author.bot !== true)
         .map(
           (m) =>
@@ -48,9 +46,16 @@ module.exports = class Transcript extends Interaction {
         )
         .reverse()
         .join("\n");
-      if (a.length < 1) a = "No messages sent";
-      await JSP.publish(a).then(async (res) => {
-        let urlToPaste = res.url
+      if (b.length < 1) b = "No messages sent";
+      await this.client.paste
+        .createPaste({
+          code: `${b}`,
+          expireDate: "N",
+          publicity: 1,
+          name: `${int.channel.name}`,
+        })
+        .then(async (res) => {
+          let urlToPaste = res;
           let ticket = await tickets.findOne({
             ticketID: int.channel.id,
             guildID: int.guild.id,
