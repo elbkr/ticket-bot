@@ -61,7 +61,7 @@ https://discord.com/api/oauth2/authorize?client_id=REPLACE_THIS&permissions=8&sc
 
 ### Getting Pastebin API key
 1. Login or register into [Pastebin](https://pastebin.com)
-2. Go to https://pastebin.com/doc_api
+2. Go to [Pastebin API docs](https://pastebin.com/doc_api)
 3. Slide down to **Your Unique Developer API Key** section 
 4. Copy the key and paste it into `.env` file  at `PASTE_API_KEY` line
 
