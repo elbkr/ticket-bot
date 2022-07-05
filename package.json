@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/elbkr/ticket-bot#readme",
   "dependencies": {
-    "@discordjs/opus": "^0.7.0",
+    "@discordjs/opus": "^0.8.0",
     "@discordjs/rest": "^0.2.0-canary.0",
     "bufferutil": "^4.0.5",
     "chalk": "^4.0.0",
