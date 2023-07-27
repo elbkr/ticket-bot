@@ -1,33 +1,34 @@
 {
-  "name": "music-bot",
+  "name": "ticket-bot",
   "version": "1.0.0",
-  "description": "discord.js music bot w/mongoDB",
+  "description": "discord.js v14 ticket bot w/mongoDB",
   "type": "module",
   "main": "index.js",
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elbkr/music-bot.git"
+    "url": "git+https://github.com/elbkr/ticket-bot.git"
   },
   "keywords": [
     "discord.js",
     "discord.bot",
     "bot",
-    "music",
-    "music-bot",
-    "mongodb"
+    "ticket",
+    "ticket-bot",
+    "mongodb",
+    "444x"
   ],
   "author": "el bkr (https://github.com/elbkr)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elbkr/music-bot/issues"
+    "url": "https://github.com/elbkr/ticket-bot/issues"
   },
-  "homepage": "https://github.com/elbkr/music-bot#readme",
+  "homepage": "https://github.com/elbkr/ticket-bot#readme",
   "dependencies": {
     "bufferutil": "^4.0.6",
     "chalk": "^4.0.0",
