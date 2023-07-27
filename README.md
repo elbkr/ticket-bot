@@ -10,7 +10,8 @@
   </a>  Thanks to <a href="https://www.jetbrains.com/community/opensource/#support">JetBrains</a> for providing me free license for developing this project!
   </p>
   
-  
+## Special Thanks To [444x](https://github.com/unf6) For Updating To V14
+
 ## Features
 - Multi guild!
 - Open tickets by pressing a button
@@ -33,10 +34,10 @@
 ## Installation
 
 ### Requirements
-- Node v16 or higher
+- Node v18 or higher
 
 ### Getting the files
-1. GitHub CLI: `gh repo clone elbkr/ticket-bot`
+1. GitHub CLI: `git clone https://github.com/elbkr/ticket-bot`
 2. Download and extract the zip
 3. Open with GitHub Desktop
 
@@ -58,12 +59,6 @@ https://discord.com/api/oauth2/authorize?client_id=REPLACE_THIS&permissions=8&sc
 5. Paste the URL into `.env` file  at `MONGO` line
 
 *The URL looks like this:* `mongodb+srv://username:password@clusterName.pjxpv.mongodb.net/MyFirstDatabase?retryWrites=true&w=majority`
-
-### Getting Pastebin API key
-1. Login or register into [Pastebin](https://pastebin.com)
-2. Go to [Pastebin API docs](https://pastebin.com/doc_api)
-3. Slide down to **Your Unique Developer API Key** section 
-4. Copy the key and paste it into `.env` file  at `PASTEBIN_API_KEY` line
 
 ### Changing ticket topics
 1. Go to `src/events/interactions/buttonPress.js` file
@@ -92,18 +87,3 @@ CLIENT_ID=521311050193436682
 ### Running the BOT
 1. Open a terminal and run `npm install` or `npm i`
 2. Run `node .`
-
-## Free hosting
-1. Local host
-   After the configuration, run `node .` in the terminal (not recommended)
-   - It turns off when you turn off the PC
-2. Heroku
-   - After the configuration, add the files to a GitHub repository
-   - Login or register in [Heroku](https://id.heroku.com/login)
-   - Create a new app
-   - In `deploy` section, press `Connect to GitHub`
-   - After connecting, search for the repository and press `connect`
-   - Press **Enable automatic deploys** (optional)
-   - Click **Deploy Branch**
-   - Go to `Resources` section
-   - Disable the `web` type and enable `worker` type
