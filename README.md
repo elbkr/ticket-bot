@@ -10,7 +10,7 @@
   </a>  Thanks to <a href="https://www.jetbrains.com/community/opensource/#support">JetBrains</a> for providing me free license for developing this project!
   </p>
   
-## Special Thanks To [444x](https://github.com/unf6) For Updating To V14
+##### Special Thanks To [444x](https://github.com/unf6) For Updating To V14
 
 ## Features
 - Multi guild!
