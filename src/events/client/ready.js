@@ -1,3 +1,5 @@
+import tickets from "../../models/Tickets.js";
+
 export default class Ready extends Event {
     constructor() {
         super({
@@ -7,7 +9,10 @@ export default class Ready extends Event {
     }
 
     async exec() {
-        this.client.user.setActivity("/play", {type: ActivityType.Watching});
+
+        let ticket = await tickets.find()
+        
+        this.client.user.setActivity("${ticket.length} tickets", {type: ActivityType.Watching});
 
         let allMembers = new Set();
         this.client.guilds.cache.forEach((guild) => {
@@ -17,6 +22,12 @@ export default class Ready extends Event {
         });
 
         let allChannels = new Set();
+        this.client.guilds.cache.forEach((guild) => {
+            guild.channels.cache.forEach((channel) => {
+                allChannels.add(channel.id);
+            });
+        });
+        
         this.client.logger.log(`Connected into ${this.client.user.tag}`, {
             tag: "Ready",
         });
