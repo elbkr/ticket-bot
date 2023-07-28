@@ -30,19 +30,13 @@
   },
   "homepage": "https://github.com/elbkr/ticket-bot#readme",
   "dependencies": {
-    "bufferutil": "^4.0.6",
     "chalk": "^4.0.0",
-    "discord-html-transcripts": "^3.1.4",
     "discord.js": "^14.0.3",
     "dotenv": "^16.0.1",
     "fs": "^0.0.1-security",
     "glob": "^7.2.0",
-    "isomorphic-unfetch": "^4.0.2",
     "moment": "^2.29.4",
     "mongoose": "^6.4.5",
-    "pretty-ms": "^8.0.0",
-    "seconds-formater": "^1.2.0",
-    "utf-8-validate": "^5.0.9",
     "util": "^0.12.4"
   }
 }
