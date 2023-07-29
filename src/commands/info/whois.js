@@ -55,9 +55,9 @@ export default class Whois extends Interaction {
 
       .addFields(
         if (member.nickname) { name: "Nickname", value: `${member.nickname}`, },
-        { name: "Joined at", value: `moment(member.user.joinedAt).format("LLLL"))`, },
-        { name: "Created at", value: `moment(member.user.joinedAt).format("LLLL"))`, },
-        { name: "Badges", value: `badges.join(" | ") || "None") },
+        { name: "Joined at", value: `${moment(member.user.joinedAt).format("LLLL"))}`, },
+        { name: "Created at", value: `${moment(member.user.joinedAt).format("LLLL"))}`, },
+        { name: "Badges", value: `${badges.join(" | ") || "None")}` },
         { name: "Roles", value: `${roles}` },
         
       )
