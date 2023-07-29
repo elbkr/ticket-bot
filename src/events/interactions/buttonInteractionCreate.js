@@ -8,7 +8,7 @@ import {
   PermissionFlagsBits,
   StringSelectMenuBuilder,
 } from "discord.js";
-
+import { isBlacklisted } from "../../utils/isBlacklisted.js";
 import tickets from "../../models/Tickets.js";
 
 export default class ButtonInteractionCreate extends Event {
@@ -21,6 +21,9 @@ export default class ButtonInteractionCreate extends Event {
 
   async exec(int, data) {
     if (int.customId === "open") {
+      
+      if (await isBlacklisted(int)) return;
+      
       let ticket = await tickets.findOne({
         guildID: int.guild.id,
         _id: int.user.id,
