@@ -8,6 +8,7 @@ import {
   PermissionFlagsBits,
   ComponentType,
 } from "discord.js";
+import { isBlacklisted } from "../../utils/isBlacklisted.js";
 
 export default class Open extends Interaction {
   constructor() {
@@ -19,6 +20,8 @@ export default class Open extends Interaction {
 
   async exec(int, data) {
 
+    if (await isBlacklisted(int)) return;
+    
     let ticket = await tickets.findOne({
       guildID: int.guild.id,
       _id: int.user.id,
