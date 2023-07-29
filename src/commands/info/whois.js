@@ -58,7 +58,7 @@ export default class Whois extends Interaction {
         { name: "Joined at", value: `moment(member.user.joinedAt).format("LLLL"))`, },
         { name: "Created at", value: `moment(member.user.joinedAt).format("LLLL"))`, },
         { name: "Badges", value: `badges.join(" | ") || "None") },
-        { name: "Roles", value: `${roles} },
+        { name: "Roles", value: `${roles}` },
         
       )
       .setFooter({ text: `ID ${member.user.id}`}):
