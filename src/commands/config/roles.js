@@ -1,18 +1,19 @@
-const {MessageEmbed} = require('discord.js');
+import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js"
 
-module.exports = class Roles extends Interaction {
+export default class Roles extends Interaction {
     constructor() {
         super({
             name: "roles",
-            description: "Manage mod roles",
+            description: "Manage Mod Roles",
+
             options: [
                 {
-                    type: "1",
+                    type: ApplicationCommandOptionType.Subcommand,
                     name: "add",
                     description: "Add a role to the mod roles list",
                     options: [
                         {
-                            type: "8",
+                            type: ApplicationCommandOptionType.Role,
                             name: "role",
                             description: "The role to add",
                             required: true,
@@ -20,12 +21,12 @@ module.exports = class Roles extends Interaction {
                     ]
                 },
                 {
-                    type: "1",
+                    type: ApplicationCommandOptionType.Subcommand,
                     name: "remove",
                     description: "Remove a role from the mod roles list",
                     options: [
                         {
-                            type: "8",
+                            type: ApplicationCommandOptionType.Role,
                             name: "role",
                             description: "The role to remove",
                             required: true,
@@ -33,25 +34,28 @@ module.exports = class Roles extends Interaction {
                     ]
                 },
                 {
-                    type: "1",
+                    type: ApplicationCommandOptionType.Subcommand,
                     name: "list",
                     description: "List all mod roles",
                 },
             ],
+
         });
     }
-    async exec(int, data) {
-        if (!int.member.permissions.has("MANAGE_GUILD"))
-            return int.reply({
-                content: "You don't have the required permissions to do this!",
-                ephemeral: true,
-            });
 
+    async exec(int, data) {
+     
+        if (!int.member.permissions.has(PermissionFlagsBits.ManageGuild))
+        return int.reply({
+            content: "You don't have the required permissions to do this!",
+            ephemeral: true,
+        });
+        
         const cmd = int.options.getSubcommand("add")
-      
+
         if(cmd === "add") {
 
-            let role = int.options._hoistedOptions[0].role
+            let role = int.options.getRole("role")
 
             if(role.id === int.guild.id) {
                 return int.reply({
@@ -77,7 +81,7 @@ module.exports = class Roles extends Interaction {
             });
         }
         if (cmd === "remove") {
-          let role = int.options._hoistedOptions[0].role;
+          let role = int.options.getRole("role");
 
           if (role.id === int.guild.id) {
             return int.reply({
@@ -112,14 +116,14 @@ module.exports = class Roles extends Interaction {
               ephemeral: true,
             });
 
-          let emb = new MessageEmbed()
+          let emb = new EmbedBuilder()
             .setTitle("Mod roles list")
             .setThumbnail(int.guild.iconURL({ size: 2048, dynamic: true }))
-            .setColor("#2f3136")
             .setDescription(`${mods.map((m) => `<@&${m}>`).join(" ")}`)
             .setTimestamp();
 
           return int.reply({ embeds: [emb] });
         }
+
     }
 };

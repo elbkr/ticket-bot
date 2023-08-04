@@ -1,60 +1,42 @@
-const {Client, Collection, Intents} = require("discord.js");
-const {connect, connection: db} = require("mongoose");
-const PasteClient = require("pastebin-api").default;
-const {Routes} = require("discord-api-types/v9");
-const {REST} = require("@discordjs/rest");
-const {resolve} = require("path");
-const {sync} = require("glob");
+import {Client, Collection, GatewayIntentBits, Partials, Routes, REST} from "discord.js";
+import pkgm, { set } from "mongoose";
+const { connect, connection } = pkgm
+const db = connection
+import { resolve } from "path";
+import pkg from "glob";
+const { sync } = pkg;
+import { pathToFileURL } from "node:url"; 
+import("./Interaction.js");
+import("./Event.js");
+import Logger from "../utils/Logger.js";
+import { client } from '../../index.js'
+import fs from "node:fs"
+import guildsData from "../models/Guilds.js"
 
-require("./Interaction");
-require("./Event");
-
-module.exports = class Bot extends Client {
+export default class Bot extends Client {
     constructor() {
         super({
-            intents: Object.values(Intents.FLAGS),
-            partials: ["MESSAGE", "REACTION"],
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent],
+            partials: [Partials.Message, Partials.Reaction],
             allowedMentions: {
-                parse: ["roles", "users"],
-                repliedUser: false,
+                parse: ["roles", "users"], repliedUser: false,
             },
         });
 
         this.events = new Collection();
-        this.logger = require("../utils/Logger");
+        this.logger = Logger
         this.interactions = new Collection();
 
         this.database = {};
-        this.guildsData = require("../models/Guilds");
+        this.guildsData = guildsData;
         this.database.guilds = new Collection();
 
-        db.on("connected", async () =>
-            this.logger.log(
-                `Successfully connected to the database! (Latency: ${Math.round(await this.databasePing())}ms)`,
-                {tag: "Database"}
-            )
-        );
-        db.on("disconnected", () =>
-            this.logger.error("Disconnected from the database!", {tag: "Database"})
-        );
-        db.on("error", (error) =>
-            this.logger.error(
-                `Unable to connect to the database!\n${
-                    error.stack ? error + "\n\n" + error.stack : error
-                }`,
-                {
-                    tag: "Database",
-                }
-            )
-        );
-        db.on("reconnected", async () =>
-            this.logger.log(
-                `Reconnected to the database! (Latency: ${Math.round(
-                    await this.databasePing()
-                )}ms)`,
-                {tag: "Database"}
-            )
-        );
+        db.on("connected", async () => this.logger.log(`Successfully connected to the database! (Latency: ${Math.round(await this.databasePing())}ms)`, {tag: "Database"}));
+        db.on("disconnected", () => this.logger.error("Disconnected from the database!", {tag: "Database"}));
+        db.on("error", (error) => this.logger.error(`Unable to connect to the database!\n${error.stack ? error + "\n\n" + error.stack : error}`, {
+            tag: "Database",
+        }));
+        db.on("reconnected", async () => this.logger.log(`Reconnected to the database! (Latency: ${Math.round(await this.databasePing())}ms)`, {tag: "Database"}));
     }
 
     async getGuild({_id: guildId}, check) {
@@ -80,9 +62,9 @@ module.exports = class Bot extends Client {
 
     /* Start database */
     async loadDatabase() {
+        set('strictQuery', true)
         return connect(process.env.MONGO, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            useNewUrlParser: true, useUnifiedTopology: true
         });
     }
 
@@ -94,48 +76,52 @@ module.exports = class Bot extends Client {
         return (time[0] * 1e9 + time[1]) * 1e-6;
     }
 
-    async loadPaste() {
-        let paste = new PasteClient(process.env.PASTEBIN_API_KEY);
-        this.paste = paste;
-    }
 
-    /* Load slash commands for each guilds */
+    /* Load slash commands for each guild */
     async loadInteractions(guildId) {
-        const intFile = await sync(resolve("./src/commands/**/*.js"));
-        intFile.forEach((filepath) => {
-            const File = require(filepath);
-            if (!(File.prototype instanceof Interaction)) return;
+        const intFile = sync(resolve("./src/commands/**/*.js"));
+        let data = []
+        for (let filepath of intFile) {
+            filepath = pathToFileURL(filepath)
+            let File = await import(filepath);
+            File = File.default
+
+            if (!(File.prototype instanceof Interaction)) continue;
             const interaction = new File();
             interaction.client = this;
             this.interactions.set(interaction.name, interaction);
-            const rest = new REST({version: "9"}).setToken(process.env.TOKEN);
 
-            rest.post(
-                Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId),
-                {
-                    body: interaction,
-                }
-            );
-        });
+            data.push({
+                name: interaction.name,
+                description: interaction.description,
+                type: interaction.type,
+                options: interaction.options
+            });
+        }
+
+        const rest = new REST({version: "10"}).setToken(process.env.TOKEN);
+
+        rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), {
+            body: data,
+        }).catch((err) => {
+            console.log(err);
+        })
     }
 
     /* Load events */
     async loadEvents() {
-        const evtFile = await sync(resolve("./src/events/**/*.js"));
-        evtFile.forEach((filepath) => {
-            const File = require(filepath);
+        const evtFile = sync(resolve("./src/events/**/*.js"));
+            evtFile.forEach(async (filepath) => {
+            filepath = pathToFileURL(filepath)
+            let File = await import(filepath);
+            File = File.default
+
             if (!(File.prototype instanceof Event)) return;
             const event = new File();
             event.client = this;
             this.events.set(event.name, event);
-            const emitter = event.emitter
-                ? typeof event.emitter === "string"
-                    ? this[event.emitter]
-                    : emitter
-                : this;
-            emitter[event.type ? "once" : "on"](event.name, (...args) =>
-                event.exec(...args)
-            );
+            const emitter = event.emitter ? typeof event.emitter === "string" ? this[event.emitter] : emitter : this;
+            emitter[event.type ? "once" : "on"](event.name, (...args) => event.exec(...args));
         });
     }
 
@@ -143,7 +129,6 @@ module.exports = class Bot extends Client {
     async start(token) {
         await this.loadEvents();
         await this.loadDatabase();
-        await this.loadPaste();
-        return super.login(token);
+        return client.login(token);
     }
 };

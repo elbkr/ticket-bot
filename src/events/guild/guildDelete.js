@@ -1,33 +1,22 @@
-const tickets = require("../../models/Tickets");
-module.exports = class GuildDelete extends Event {
-  constructor() {
-    super({
-      name: "guildDelete",
-      once: false,
-    });
-  }
-  async exec(guild) {
-    const data = await this.client.getGuild({ _id: guild.id });
+import { ButtonBuilder, ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
-    await tickets.find({
-      guildID: guild.id,
-    }).then(ticket => {
-      if(ticket.length > 0) {
-        ticket.forEach(async t => {
-          await t.delete();
+export default class GuildDelete extends Event {
+    constructor() {
+        super({
+            name: "guildDelete",
+            once: false,
         });
-      }
-    });
+    }
 
-    await data
-      .delete()
-      .catch((err) =>
-        this.client.logger.error(
-          `An error occurred when trying to trigger guildDelete event.\n${
-            err.stack ? err + "\n\n" + err.stack : err
-          }`,
-          { tag: "guildDelete" }
-        )
-      );
-  }
+    async exec(guild) {
+
+        const data = await this.client.getGuild({_id: guild.id});
+
+        await data
+        .delete()
+        .then(() => {
+            this.client.logger.warn(`${guild.name} (${guild.id}) has been deleted from the database.`, {tag: "guildDelete"})
+        })
+
+    }
 };

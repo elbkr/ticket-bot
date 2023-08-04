@@ -1,6 +1,6 @@
-const tickets = require("../../models/Tickets");
+import tickets from "../../models/Tickets.js";
 
-module.exports = class Ready extends Event {
+export default class Ready extends Event {
     constructor() {
         super({
             name: "ready",
@@ -9,13 +9,10 @@ module.exports = class Ready extends Event {
     }
 
     async exec() {
-        setInterval(async () => {
 
-            let ticket = await tickets.find()
-
-          this.client.user.setActivity(`${ticket.length} tickets`, { type: "WATCHING" });
-
-        }, 30000);
+        let ticket = await tickets.find()
+        
+        this.client.user.setActivity("${ticket.length} tickets", {type: ActivityType.Watching});
 
         let allMembers = new Set();
         this.client.guilds.cache.forEach((guild) => {
@@ -30,6 +27,7 @@ module.exports = class Ready extends Event {
                 allChannels.add(channel.id);
             });
         });
+        
         this.client.logger.log(`Connected into ${this.client.user.tag}`, {
             tag: "Ready",
         });
@@ -39,7 +37,6 @@ module.exports = class Ready extends Event {
                 tag: "Data",
             }
         );
-
 
         for (const guild of this.client.guilds.cache.values()) {
             await this.client.loadInteractions(guild.id);
