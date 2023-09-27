@@ -240,14 +240,19 @@ export default class Open extends Interaction {
                         .reverse()
                         .join("\n");
                       if (b.length < 1) b = "No messages sent";
-                      await client.createPaste({
-                          code: `${b}`,
-                          expireDate: ExpireDate.Never,
-                          publicity: Publicity.Unlisted,
-                          name: `${int.channel.name}`,
-                        })
-                        .then(async (res) => {
-                          let urlToPaste = res;
+
+                      const options = {
+            method: "POST",
+            body: b,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          };
+          const res = await (
+            await fetch("https://hastebin.blackforthosting.com/documents", options)
+          ).json();
+          const urlToPaste = `https://hastebin.blackforthosting.com/${res.key}`
+                      
                           let row = new ActionRowBuilder().addComponents(
                             new ButtonBuilder()
                               .setLabel("View transcript")
@@ -349,15 +354,17 @@ export default class Open extends Interaction {
                     .reverse()
                     .join("\n");
                   if (b.length < 1) b = "No messages sent";
-                  await client
-                    .createPaste({
-                      code: `${b}`,
-                      expireDate: ExpireDate.Never,
-                      publicity: Publicity.Unlisted,
-                      name: `${int.channel.name}`,
-                    })
-                    .then(async (res) => {
-                      let urlToPaste = res;
+                  const options = {
+            method: "POST",
+            body: b,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          };
+          const res = await (
+            await fetch("https://hastebin.blackforthosting.com/documents", options)
+          ).json();
+          const urlToPaste = `https://hastebin.blackforthosting.com/${res.key}`
                       let row = new ActionRowBuilder().addComponents(
                         new ButtonBuilder()
                           .setLabel("View transcript")
