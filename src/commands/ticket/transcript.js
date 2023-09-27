@@ -1,6 +1,5 @@
 import tickets from "../../models/Tickets.js";
 import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
-import { PasteClient, ExpireDate, Publicity } from "pastebin-api";
 
 export default class Transcript extends Interaction {
     constructor() {
