@@ -1,6 +1,13 @@
-import { ButtonBuilder, ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import Event from "../../struct/Event.js";
 
-
+/**
+ * Provisions a newly joined guild.
+ *
+ * Creates its default configuration and publishes the command set immediately,
+ * so the bot is usable without waiting for global command propagation.
+ *
+ * @extends {Event}
+ */
 export default class GuildCreate extends Event {
     constructor() {
         super({
@@ -9,6 +16,10 @@ export default class GuildCreate extends Event {
         });
     }
 
+    /**
+     * @param   {import("discord.js").Guild} guild
+     * @returns {Promise<void>}
+     */
     async exec(guild) {
  
         await this.client.getGuild({_id: guild.id});

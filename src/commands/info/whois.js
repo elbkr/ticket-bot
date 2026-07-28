@@ -1,70 +1,76 @@
-import { EmbedBuilder, ApplicationCommandOptionType } from "discord.js";
-import moment from "moment";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
+import Interaction from "../../struct/Interaction.js";
+import { PRIMARY_COLOR, buildEmbed, embedReply, joinWithinLimit } from "../../utils/theme.js";
+
+function formatDate(date) {
+    return date ? `<t:${Math.floor(date.getTime() / 1000)}:F>` : "Unknown";
+}
 
 export default class Whois extends Interaction {
-
     constructor() {
         super({
             name: "whois",
             description: "Get information about a user",
-
             options: [
                 {
-                  type: ApplicationCommandOptionType.User,
-                  name: "user",
-                  description: "The user to get information about",
-                  required: true,
+                    type: ApplicationCommandOptionType.User,
+                    name: "user",
+                    description: "User to inspect",
+                    required: true,
                 },
-              ],
+            ],
         });
     }
-    async exec(int, data) {
 
-        let member = int.options.getMember("user");
+    async exec(interaction) {
+        try {
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    //NOW BADGES
-    let flags = await member.user.flags;
-    flags = await flags.toArray();
+            const user = interaction.options.getUser("user", true);
+            const member = await interaction.guild.members.fetch(user.id).catch(() => null);
 
-    let badges = [];
+            if (!member) {
+                await interaction.editReply(embedReply("❌ Could not resolve member in this server."));
+                return;
+            }
 
-    flags.forEach((f) => {
-      if (f.toLowerCase().includes("bravery")) f = "HOUSE OF BRAVERY";
-      if (f.toLowerCase().includes("brilliance")) f = "HOUSE OF BRILLIANCE";
-      if (f.toLowerCase().includes("balance")) f = "HOUSE OF BALANCE";
-      badges.push(f.replace("_", " "));
-    });
+            const roles = member.roles.cache
+                .filter((r) => r.id !== interaction.guild.id)
+                .map((r) => r.toString());
 
-    // ROLES
-    let roles =
-      member.roles.cache.filter((r) => r.id !== int.guild.id).size > 0
-        ? member.roles.cache
-            .filter((r) => r.id !== int.guild.id)
-            .map((x) => x)
-            .join(" ")
-        : "None";
+            const flags = user.flags ?? (await interaction.client.users.fetch(user.id, { force: true })).flags;
+            const badgeList = flags.toArray().length
+                ? joinWithinLimit(flags.toArray(), ", ")
+                : "None";
 
-    let embed = new EmbedBuilder()
-      .setColor("#2f3136")
-      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }));
+            const embed = new EmbedBuilder()
+                .setColor(PRIMARY_COLOR)
+                .setAuthor({
+                    name: user.tag,
+                    iconURL: user.displayAvatarURL({ forceStatic: false })
+                })
+                .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 512 }))
+                .addFields(
+                    { name: "User ID", value: `\`${user.id}\``, inline: true },
+                    { name: "Nickname", value: member.nickname ?? "None", inline: true },
+                    { name: "Joined Server", value: formatDate(member.joinedAt), inline: false },
+                    { name: "Account Created", value: formatDate(user.createdAt), inline: false },
+                    { name: "Badges", value: badgeList, inline: false },
+                    { name: "Roles", value: roles.length ? joinWithinLimit(roles, " ") : "None", inline: false }
+                )
+                .setTimestamp();
 
-    embed.setAuthor(
-      member.user.tag,
-      member.user.displayAvatarURL({ dynamic: true })
-    );
-
-      .addFields(
-        if (member.nickname) { name: "Nickname", value: `${member.nickname}`, },
-        { name: "Joined at", value: `${moment(member.user.joinedAt).format("LLLL"))}`, },
-        { name: "Created at", value: `${moment(member.user.joinedAt).format("LLLL"))}`, },
-        { name: "Badges", value: `${badges.join(" | ") || "None")}` },
-        { name: "Roles", value: `${roles}` },
-        
-      )
-      .setFooter({ text: `ID ${member.user.id}`}):
-
-    return int.reply({ embeds: [embed] });
-
+            await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+            interaction.client.logger.error(error, { color: "red", tag: "Error" });
+            if (interaction.deferred || interaction.replied) {
+                await interaction.editReply(embedReply("❌ Failed to resolve user info.")).catch(() => null);
+            } else {
+                await interaction.reply({
+                    embeds: [buildEmbed({ description: "❌ Failed to resolve user info." })],
+                    flags: MessageFlags.Ephemeral
+                }).catch(() => null);
+            }
+        }
     }
-
-};
+}

@@ -1,11 +1,13 @@
-import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js"
+import {ApplicationCommandOptionType, MessageFlags} from "discord.js";
+import Interaction from "../../struct/Interaction.js";
+import { EMBED_DESCRIPTION_LIMIT, buildEmbed, joinWithinLimit } from "../../utils/theme.js";
+import { hasConfigAccess, permissionDeniedReply } from "../../utils/permissions.js";
 
 export default class Roles extends Interaction {
     constructor() {
         super({
             name: "roles",
             description: "Manage Mod Roles",
-
             options: [
                 {
                     type: ApplicationCommandOptionType.Subcommand,
@@ -39,91 +41,86 @@ export default class Roles extends Interaction {
                     description: "List all mod roles",
                 },
             ],
-
         });
     }
 
     async exec(int, data) {
-     
-        if (!int.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return int.reply({
-            content: "You don't have the required permissions to do this!",
-            ephemeral: true,
-        });
-        
-        const cmd = int.options.getSubcommand("add")
+        if (!hasConfigAccess(int.member)) {
+            return int.reply(permissionDeniedReply());
+        }
 
-        if(cmd === "add") {
+        const cmd = int.options.getSubcommand();
 
-            let role = int.options.getRole("role")
+        if (cmd === "add") {
+            const role = int.options.getRole("role");
 
-            if(role.id === int.guild.id) {
+            if (role.id === int.guild.id) {
                 return int.reply({
-                    content: "The *everyone* role is not manageable!",
-                    ephemeral: true,
+                    embeds: [buildEmbed().setTitle('⚠️ Invalid Role').setDescription("The *everyone* role is not manageable!")],
+                    flags: MessageFlags.Ephemeral,
                 });
             }
-            let old = data.modRoles.find((r) => r === role.id);
+            const old = data.modRoles.find((r) => r === role.id);
 
             if (old) {
                 return int.reply({
-                    content: `The role ${role.name} is already in the list!`,
-                    ephemeral: true,
+                    embeds: [buildEmbed().setTitle('⚠️ Already Added').setDescription(`The role ${role.name} is already in the list!`)],
+                    flags: MessageFlags.Ephemeral,
                 });
             }
 
-            data.modRoles.push(role.id);
-            await data.save();
+            await this.client.updateGuild(int.guild.id, { $addToSet: { modRoles: role.id } });
 
             return int.reply({
-                content: `Added role ${role.name} to the mod roles list!`,
-                ephemeral: true,
+                embeds: [buildEmbed().setTitle('✅ Role Added').setDescription(`Added role ${role.name} to the mod roles list!`)],
+                flags: MessageFlags.Ephemeral,
             });
         }
+
         if (cmd === "remove") {
-          let role = int.options.getRole("role");
+            const role = int.options.getRole("role");
 
-          if (role.id === int.guild.id) {
+            if (role.id === int.guild.id) {
+                return int.reply({
+                    embeds: [buildEmbed().setTitle('⚠️ Invalid Role').setDescription("The *everyone* role is not manageable!")],
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            const old = data.modRoles.find((r) => r === role.id);
+
+            if (!old) {
+                return int.reply({
+                    embeds: [buildEmbed().setTitle('⚠️ Role Not Found').setDescription(`The role ${role.name} is not in the list!`)],
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            await this.client.updateGuild(int.guild.id, { $pull: { modRoles: role.id } });
+
             return int.reply({
-              content: "The *everyone* role is not manageable!",
-              ephemeral: true,
+                embeds: [buildEmbed().setTitle('✅ Role Removed').setDescription(`Removed role ${role.name} from the mod roles list!`)],
+                flags: MessageFlags.Ephemeral,
             });
-          }
-
-          let old = data.modRoles.find((r) => r === role.id);
-
-          if (!old)
-            return int.reply({
-              content: `The role ${role.name} is not in the list!`,
-              ephemeral: true,
-            });
-
-          let index = data.modRoles.indexOf(role.id);
-          data.modRoles.splice(index, 1);
-          await data.save();
-
-          return int.reply({
-            content: `Removed role ${role.name} from the mod roles list!`,
-            ephemeral: true,
-          });
         }
+
         if (cmd === "list") {
-          let mods = data.modRoles;
+            const mods = data.modRoles;
 
-          if (!mods.length)
-            return int.reply({
-              content: "There are no mod roles set!",
-              ephemeral: true,
-            });
+            if (!mods.length) {
+                return int.reply({
+                    embeds: [buildEmbed().setTitle('⚠️ No Roles Set').setDescription("There are no mod roles set!")],
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
 
-          let emb = new EmbedBuilder()
-            .setTitle("Mod roles list")
-            .setThumbnail(int.guild.iconURL({ size: 2048, dynamic: true }))
-            .setDescription(`${mods.map((m) => `<@&${m}>`).join(" ")}`)
-            .setTimestamp();
+            const emb = buildEmbed()
+                .setTitle("🛡️ Mod Roles List")
+                .setThumbnail(int.guild.iconURL({ size: 2048 }))
+                .setDescription(joinWithinLimit(mods.map((m) => `<@&${m}>`), " ", EMBED_DESCRIPTION_LIMIT))
+                .setTimestamp();
 
-          return int.reply({ embeds: [emb] });
+            return int.reply({ embeds: [emb] });
         }
-
     }
-};
+}

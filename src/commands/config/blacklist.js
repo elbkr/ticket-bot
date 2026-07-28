@@ -1,12 +1,16 @@
-import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js"
-import UB from "../../models/userBlacklist.js";
+import { ApplicationCommandOptionType, MessageFlags } from "discord.js";
+import Interaction from "../../struct/Interaction.js";
+import * as blacklistRepository from "../../repositories/blacklistRepository.js";
+import { buildEmbed } from "../../utils/theme.js";
+import { hasConfigAccess, permissionDeniedReply } from "../../utils/permissions.js";
+
+const SNOWFLAKE_PATTERN = /^\d{17,20}$/;
 
 export default class Blacklist extends Interaction {
     constructor() {
         super({
             name: "blacklist",
             description: "Blacklist System",
-
             options: [
                 {
                     type: ApplicationCommandOptionType.Subcommand,
@@ -24,7 +28,7 @@ export default class Blacklist extends Interaction {
                             description: "Provide a reason for blacklisting this user",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                          },
+                        },
                     ]
                 },
                 {
@@ -43,90 +47,107 @@ export default class Blacklist extends Interaction {
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "show",
-                    description: "List all blacklisted user",
+                    description: "List all blacklisted users",
                 },
             ],
-
         });
     }
 
     async exec(int) {
-     
-        const embed = new EmbedBuilder().setColor('Blurple').setTimestamp();
-        const userID = int.options.getString("userid");
-        const blacklist_reason = int.options.getString("reason");
-        const data = await UB.findOne({ userId: userID });
+        if (!hasConfigAccess(int.member)) {
+            return int.reply(permissionDeniedReply());
+        }
 
-        if (!int.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return int.reply({
-            content: "You don't have the required permissions to do this!",
-            ephemeral: true,
-        });
-        
+        await int.deferReply({ flags: MessageFlags.Ephemeral });
+
         const cmd = int.options.getSubcommand();
+        const guildId = int.guild.id;
 
-        if(cmd === "add") {
+        if (cmd === "show") {
+            const blacklistedUsers = await blacklistRepository.listBlacklistByGuildId(guildId);
+            const embed = buildEmbed({ timestamp: true }).setTitle('⛔ Blacklisted Users');
+
+            if (blacklistedUsers.length === 0) {
+                embed.setDescription("There are currently no blacklisted users.");
+            } else {
+                blacklistedUsers.forEach((user) => {
+                    embed.addFields(
+                        { name: `User ID`, value: `${user.userId}`, inline: true },
+                        { name: `Reason`, value: `${user.reason}`, inline: true },
+                        { name: `Time`, value: `<t:${Math.floor(Number(user.time) / 1000)}:F> (<t:${Math.floor(Number(user.time) / 1000)}:R>)`, inline: true },
+                    );
+                });
+            }
+
+            return int.editReply({
+                embeds: [embed],
+            });
+        }
+
+        const userID = int.options.getString("userid").trim();
+
+        if (!SNOWFLAKE_PATTERN.test(userID)) {
+            return int.editReply({
+                embeds: [
+                    buildEmbed()
+                        .setTitle('⚠️ Invalid User ID')
+                        .setDescription("That is not a valid Discord user ID. It must be 17-20 digits.")
+                ],
+            });
+        }
+
+        const data = await blacklistRepository.findBlacklistByUserId(userID, guildId);
+
+        if (cmd === "add") {
+            const blacklist_reason = int.options.getString("reason");
 
             if (data) {
-                return int.reply({
+                return int.editReply({
                     embeds: [
-                        embed.setDescription('🔹 | This user is already blacklisted.'),
+                        buildEmbed()
+                            .setTitle('⚠️ Already Blacklisted')
+                            .setDescription('This user is already in the blacklist.')
                     ],
                 });
             }
-         
-            await UB.create({
+
+            await blacklistRepository.createBlacklistEntry({
                 userId: userID,
+                guildId,
                 reason: blacklist_reason,
                 time: Date.now(),
             });
-    
-            return int.reply({
+
+            return int.editReply({
                 embeds: [
-                    embed.setDescription(
-                        `🔹 | This user has been successfully blacklisted for ${blacklist_reason}.`,
-                    ),
+                    buildEmbed()
+                        .setTitle('⛔ User Added to Blacklist')
+                        .setDescription('This user has been successfully blacklisted.')
+                        .addFields({ name: 'Reason', value: blacklist_reason, inline: false })
                 ],
             });
         }
 
         if (cmd === "remove") {
             if (!data) {
-                return int.reply({
-                    embeds: [embed.setDescription('This user isn\'t blacklisted.')],
+                return int.editReply({
+                    embeds: [
+                        buildEmbed()
+                            .setTitle('⚠️ Not Blacklisted')
+                            .setDescription("This user isn't currently blacklisted.")
+                    ],
                 });
             }
-    
-            await data.deleteOne({ userId: userID });
-                
-            return int.reply({
+
+            await blacklistRepository.deleteBlacklistEntry(userID, guildId);
+
+            return int.editReply({
                 embeds: [
-                    embed.setDescription(
-                        '🔹 | This user has been removed from the blacklist.',
-                    ),
+                    buildEmbed()
+                        .setTitle('✅ User Removed from Blacklist')
+                        .setDescription('This user has been successfully removed from the blacklist.')
                 ],
             });
         }
-        if (cmd === "show") {
-          
-            const blacklistedUsers = await UB.find();
-
-            const embed = new EmbedBuilder()
-                .setColor('Blurple')
-                .setTimestamp();
-
-                blacklistedUsers.forEach((user) => {
-                    embed.addFields(
-                        { name: `User ID`, value: `${user.userId}`, inline: true },
-                        { name: `Reason`, value: `${user.reason}`, inline: true },
-                        { name: `Time`, value: `${user.time}`, inline: true },
-                    )
-                });
-
-                await int.reply({
-                    embeds: [embed],
-                });
-        }
-
     }
-};
+}
