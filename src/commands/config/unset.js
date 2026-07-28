@@ -1,80 +1,56 @@
-import { ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from "discord.js"
+import {ApplicationCommandOptionType, MessageFlags} from "discord.js";
+import Interaction from "../../struct/Interaction.js";
+import { buildEmbed } from "../../utils/theme.js";
+import { hasConfigAccess, permissionDeniedReply } from "../../utils/permissions.js";
 
 export default class UnsetFunctions extends Interaction {
     constructor() {
         super({
             name: "unset",
             description: "Unset a config value",
-
             options: [
                 {
-                  type: ApplicationCommandOptionType.String,
-                  name: "function",
-                  description: "The function to unset",
-                  required: true,
-                  choices: [
-                    {
-                      name: "Logs channel",
-                      value: "logs",
-                    },
-                    {
-                      name: "Tickets category",
-                      value: "category",
-                    },
-                    {
-                      name: "Transcripts channel",
-                      value: "transcript",
-                    },
-                  ],
+                    type: ApplicationCommandOptionType.String,
+                    name: "function",
+                    description: "The function to unset",
+                    required: true,
+                    choices: [
+                        { name: "Logs channel", value: "logs" },
+                        { name: "Parent channel", value: "parent" },
+                        { name: "Transcripts channel", value: "transcript" },
+                    ],
                 },
-                {
-                  type: ApplicationCommandOptionType.Channel,
-                  name: "channel",
-                  description: "The channel or category to unset the function to",
-                  required: true,
-                },
-              ],
+            ],
         });
     }
 
-    async exec(int, data) {
-     
+    async exec(int, _data) {
         const option = int.options.getString("function");
 
-        if (!int.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-          return int.reply({
-            content: "You don't have permission to do that!",
-            ephemeral: true,
-          });
-        }
-    
-        if (option === "logs") {
-          data.logsChannel = null;
-          await data.save();
-    
-          return int.reply({
-            content: "Logs channel unset!",
-            ephemeral: true,
-          });
-        }
-        if (option === "category") {
-          data.ticketsParent = null;
-          await data.save();
-    
-          return int.reply({
-            content: "Tickets category unset!",
-            ephemeral: true,
-          });
-        }
-        if (option === "transcript") {
-          data.transcriptChannel = null;
-          await data.save();
-    
-          return int.reply({
-            content: "Transcripts channel unset!",
-            ephemeral: true,
-          });
+        if (!hasConfigAccess(int.member)) {
+            return int.reply(permissionDeniedReply());
         }
 
+        if (option === "logs") {
+            await this.client.updateGuild(int.guild.id, { $set: { logsChannel: null } });
+            return int.reply({
+                embeds: [buildEmbed().setTitle('✅ Configuration Updated').setDescription("Logs channel unset!")],
+                flags: MessageFlags.Ephemeral,
+            });
+        }
+        if (option === "parent") {
+            await this.client.updateGuild(int.guild.id, { $set: { ticketsParent: null } });
+            return int.reply({
+                embeds: [buildEmbed().setTitle('✅ Configuration Updated').setDescription("Parent channel unset! Ticket threads will be created in the channel the panel is used in.")],
+                flags: MessageFlags.Ephemeral,
+            });
+        }
+        if (option === "transcript") {
+            await this.client.updateGuild(int.guild.id, { $set: { transcriptChannel: null } });
+            return int.reply({
+                embeds: [buildEmbed().setTitle('✅ Configuration Updated').setDescription("Transcripts channel unset!")],
+                flags: MessageFlags.Ephemeral,
+            });
+        }
     }
-};
+}

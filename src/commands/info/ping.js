@@ -1,3 +1,7 @@
+import { MessageFlags } from "discord.js";
+import Interaction from "../../struct/Interaction.js";
+import { embedReply } from "../../utils/theme.js";
+
 export default class Ping extends Interaction {
     constructor() {
         super({
@@ -6,8 +10,9 @@ export default class Ping extends Interaction {
         });
     }
 
-    async exec(int, data) {
-     
-        return int.reply({ content: `${this.client.ws.ping}` });
+    async exec(int) {
+        return int.reply(embedReply(`WebSocket latency: ${this.client.ws.ping} ms`, {
+            flags: MessageFlags.Ephemeral,
+        }));
     }
-};
+}

@@ -1,10 +1,22 @@
 import "dotenv/config";
-import Types from "./src/utils/Types.js";
-Types()
-
-/* Import our client structure */
 import Bot from "./src/struct/Bot.js";
-export const client = new Bot();
+import Logger from "./src/utils/Logger.js";
 
-/* Call our start function to load the bot instance */
-(async () => await client.start(process.env.TOKEN))();
+process.on("unhandledRejection", (reason) => {
+    Logger.error(reason, { color: "red", tag: "Error" });
+});
+
+process.on("uncaughtException", (error) => {
+    Logger.error(error, { color: "red", tag: "Error" });
+    process.exit(1);
+});
+
+async function bootstrap() {
+    const client = new Bot();
+    await client.start(process.env.TOKEN);
+}
+
+bootstrap().catch((error) => {
+    Logger.error(error, { color: "red", tag: "Error" });
+    process.exit(1);
+});
